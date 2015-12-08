@@ -329,6 +329,36 @@ namespace
             dstNet.connect(addedBlobs[idx].layerId, addedBlobs[idx].outNum, layerId, inNum);
         }
 
+        void make_blobproto_float(caffe::BlobProto* proto)
+        {
+          float max_int = 127;
+          float scale  = std::max(std::abs(proto->mean() - proto->max()),std::abs(proto->mean() - proto->min()));
+          float shift  = proto->mean();
+          std::cout << "in make_blobproto_float - int_data_size = " << proto->int_data_size() << "data_size = " << proto->data_size() <<"\n";
+          for (int i = 0; i < proto->int_data_size(); ++i) {
+              proto->add_data((scale/max_int)*float(proto->int_data(i))+shift);
+              //std::cout << "in make_blobproto_float, "<< i << ": " << proto->data(i) <<"\n";
+          }
+          proto->clear_int_data();
+        }
+
+        void make_layer_float(caffe::LayerParameter* param) {
+            for (int i = 0; i < param->blobs_size(); ++i) {
+              std::cout << "in make_layer_float: " << i << "\n";
+              CaffeImporter::make_blobproto_float(param->mutable_blobs(i));
+          }
+        }
+
+        void make_net_float() {
+            for (int i = 0; i < netBinary.layer_size(); ++i) {
+              caffe::LayerParameter layer_param = netBinary.layer(i);
+              std::cout << i << " make_net_float, layer: " << layer_param.name() << " ,blobs size " << layer_param.blobs_size() << "\n";
+              CaffeImporter::make_layer_float( netBinary.mutable_layer(i));
+            }
+        }
+
+
+
         ~CaffeImporter()
         {
 

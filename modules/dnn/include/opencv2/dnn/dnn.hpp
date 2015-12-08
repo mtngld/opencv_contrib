@@ -251,6 +251,7 @@ namespace dnn //! This namespace is used for dnn module functionlaity.
 
         /** @brief Adds loaded layers into the @p net and sets connetions between them. */
         virtual void populateNet(Net net) = 0;
+        virtual void make_net_float() = 0;
 
         virtual ~Importer();
     };
